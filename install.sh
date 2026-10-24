@@ -33,7 +33,7 @@ echo "[1/8] Installing system packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y python3-venv python3-dev build-essential git curl ca-certificates \
-    locales nano
+    locales nano sudo
 
 # ── 2. System tweaks ─────────────────────────────────────────────────────────
 echo "[2/8] User, locales, journal size"
@@ -41,7 +41,18 @@ if ! id "$U" >/dev/null 2>&1; then
     useradd -m -s /bin/bash "$U"
 fi
 chown "$U:$U" "$H"
-usermod -aG dialout "$U"
+usermod -aG dialout,sudo "$U"
+# Login/sudo password for "user" from secrets.env (git-ignored, see
+# secrets.env.example). Without it the password is left as it is.
+if [ -f "$APP_DIR/secrets.env" ]; then
+    . "$APP_DIR/secrets.env"
+    if [ -n "${USER_PASSWORD:-}" ]; then
+        echo "$U:$USER_PASSWORD" | chpasswd
+        echo "     password for $U set from secrets.env"
+    fi
+else
+    echo "     no secrets.env — password for $U unchanged (sudo needs one)"
+fi
 # Same SSH key as root, so ssh user@ct168 works too
 install -d -o "$U" -g "$U" -m 700 "$H/.ssh"
 install -o "$U" -g "$U" -m 600 /root/.ssh/authorized_keys "$H/.ssh/authorized_keys"

@@ -60,7 +60,16 @@ localStorage, which IS per port. Leave the browser zoom at 100 %.
 
 ## Install / rebuild
 
-From the desktop, in this repo:
+From the desktop, in this repo. First, once:
+
+```
+cp secrets.env.example secrets.env && nano secrets.env   # password for user (login + sudo)
+```
+
+`secrets.env` is in `.gitignore`; deploy.sh copies it into the CT with the
+rest. `user` is in `sudo` and `dialout`.
+
+Then:
 
 ```
 ./deploy-host.sh                        # x12-4: udev + create ct168 + passthrough
