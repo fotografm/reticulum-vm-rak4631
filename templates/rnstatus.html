@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ct168 &mdash; rnstatus</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+#topbar { display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border-dim);background:var(--panel); }
+#topbar h1 { font-size:13px;color:var(--heading);letter-spacing:3px;text-transform:uppercase; }
+#tick { font-size:10px;color:var(--dim);margin-left:auto; }
+#pause { padding:3px 12px;border:1px solid var(--btn-border);background:var(--btn-bg);color:var(--btn-label);border-radius:3px;font-family:monospace;font-size:11px;cursor:pointer; }
+#out {
+    margin:14px 16px; padding:12px 14px; white-space:pre; overflow-x:auto;
+    font-size:13px; line-height:1.45; color:var(--value-green);
+    background:#05050f; border:1px solid var(--border-dim); border-radius:4px;
+}
+</style>
+</head>
+<body>
+<div id="topbar">
+    <h1>&#128225; rnstatus &mdash; ct168</h1>
+    <button id="pause" onclick="togglePause()">Pause</button>
+    <span id="tick"></span>
+</div>
+<pre id="out">Loading&hellip;</pre>
+<script>
+'use strict';
+var paused = false, cd = 0;
+
+function togglePause() {
+    paused = !paused;
+    document.getElementById('pause').textContent = paused ? 'Resume' : 'Pause';
+}
+
+function load() {
+    fetch('/api/rnstatus').then(function(r){ return r.text(); }).then(function(t) {
+        document.getElementById('out').textContent = t;
+    }).catch(function() {
+        document.getElementById('out').textContent = 'Landing server not reachable';
+    });
+}
+
+setInterval(function() {
+    if (paused) { document.getElementById('tick').textContent = 'paused'; return; }
+    if (--cd <= 0) { cd = 5; load(); }
+    document.getElementById('tick').textContent = 'refresh in ' + cd + 's';
+}, 1000);
+</script>
+</body>
+</html>

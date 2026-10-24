@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ct168-rak4631</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+body { display:flex; flex-direction:column; align-items:center;
+       padding:24px 16px; gap:20px; min-height:100vh; }
+
+.page-title {
+    font-size:11px; letter-spacing:6px; text-transform:uppercase;
+    color:var(--muted); text-align:center; width:100%;
+    padding-bottom:6px; border-bottom:1px solid var(--border-dim);
+}
+.page-title span { color:var(--value-green); letter-spacing:2px; font-size:18px;
+                   display:block; margin-bottom:4px; }
+
+#clock { text-align:center; }
+#clock-time { font-size:34px; letter-spacing:3px; color:var(--value-green);
+              font-weight:bold; font-variant-numeric:tabular-nums; }
+#clock-date { font-size:13px; color:var(--value-white); letter-spacing:2px; }
+#clock-src  { font-size:10px; color:var(--muted); letter-spacing:1px; margin-top:3px; }
+
+.badges {
+    display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+    width:100%; max-width:480px;
+}
+.badge {
+    padding:5px 14px; border-radius:4px; font-size:12px;
+    border:1px solid var(--border-dim); background:var(--panel);
+    color:var(--muted); display:flex; align-items:center; gap:6px;
+}
+.badge .dot { width:8px; height:8px; border-radius:50%; background:#555; flex-shrink:0; }
+.badge.ok   .dot { background:var(--green-bright); box-shadow:0 0 5px var(--green-bright); }
+.badge.warn .dot { background:var(--value-warn); }
+.badge.bad  .dot { background:var(--value-alert); box-shadow:0 0 5px var(--value-alert); }
+.badge .val { color:var(--value-white); font-weight:bold; }
+.badge .lbl { color:var(--muted); }
+
+.big-btn {
+    display:block; width:100%; max-width:480px; padding:22px 16px;
+    background:var(--btn-bg); border:1px solid var(--btn-border);
+    color:var(--btn-label); text-decoration:none; text-align:center;
+    border-radius:6px; cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;
+}
+.big-btn:hover { background:var(--btn-bg-h); border-color:var(--btn-border-h); }
+.big-btn .icon  { font-size:30px; display:block; margin-bottom:6px; }
+.big-btn .label { font-size:16px; letter-spacing:2px; text-transform:uppercase;
+                  color:var(--btn-label); display:block; }
+.big-btn .sub   { font-size:11px; color:var(--btn-sub); margin-top:4px; display:block; }
+
+#grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:12px; width:100%; max-width:480px;
+}
+.grid-btn {
+    padding:18px 10px; text-align:center;
+    background:var(--btn-bg); border:1px solid var(--btn-border);
+    color:var(--btn-label); text-decoration:none;
+    border-radius:6px; cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;
+}
+.grid-btn:hover { background:var(--btn-bg-h); border-color:var(--btn-border-h); }
+.grid-btn .icon  { font-size:22px; display:block; margin-bottom:5px; }
+.grid-btn .label { font-size:13px; letter-spacing:1px; text-transform:uppercase; display:block; }
+.grid-btn .sub   { font-size:10px; color:var(--btn-sub); margin-top:3px; display:block; }
+
+#danger-row {
+    display:flex; gap:12px; width:100%; max-width:480px; margin-top:4px;
+}
+.danger-btn {
+    flex:1; padding:14px 10px; text-align:center;
+    border-radius:6px; border:1px solid var(--red-border);
+    background:#1a0808; color:var(--value-alert); cursor:pointer;
+    font-size:13px; letter-spacing:1px; text-transform:uppercase;
+    font-family:inherit; transition:background 0.15s;
+}
+.danger-btn:hover { background:#2a1010; }
+.reboot-btn { border-color:#664400; background:#1a1000; color:var(--value-warn); }
+.reboot-btn:hover { background:#2a1800; }
+
+#modal-bg {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.75); z-index:100;
+    align-items:center; justify-content:center;
+}
+#modal-bg.show { display:flex; }
+#modal {
+    background:var(--panel); border:1px solid var(--border);
+    padding:28px 32px; border-radius:8px; text-align:center; max-width:340px;
+}
+#modal h2 { color:var(--value-alert); font-size:16px; margin-bottom:12px; }
+#modal p  { color:var(--muted); font-size:13px; margin-bottom:20px; }
+#modal-btns { display:flex; gap:12px; justify-content:center; }
+.modal-cancel  { padding:10px 22px; border:1px solid var(--border);
+                 background:var(--btn-bg); color:var(--btn-label);
+                 border-radius:4px; cursor:pointer; font-size:13px; font-family:inherit; }
+.modal-cancel:hover  { background:var(--btn-bg-h); }
+.modal-confirm { padding:10px 22px; border:1px solid var(--red-border);
+                 background:#2a0808; color:var(--value-alert);
+                 border-radius:4px; cursor:pointer; font-size:13px; font-family:inherit; }
+.modal-confirm:hover { background:#3a1010; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+    <span>&#128225; RETICULUM LORA NODE (ct168)</span>
+    ct168-rak4631 &middot; RAK4631 on x12-4
+</div>
+
+<div id="clock">
+    <div id="clock-time">--:--:--</div>
+    <div id="clock-date">&mdash;</div>
+    <div id="clock-src">&nbsp;</div>
+</div>
+
+<div class="badges">
+    <div class="badge" id="b-rnsd"><div class="dot"></div><span class="lbl">rnsd</span><span class="val" id="v-rnsd">&mdash;</span></div>
+    <div class="badge" id="b-rnode"><div class="dot"></div><span class="lbl">RNode</span><span class="val" id="v-rnode">&mdash;</span></div>
+    <div class="badge" id="b-meshchat"><div class="dot"></div><span class="lbl">MeshChat</span><span class="val" id="v-meshchat">&mdash;</span></div>
+    <div class="badge" id="b-nomadnet"><div class="dot"></div><span class="lbl">NomadNet</span><span class="val" id="v-nomadnet">&mdash;</span></div>
+    <div class="badge"><span class="lbl">Ethernet</span><span class="val" id="v-eth">&mdash;</span></div>
+</div>
+
+<div id="grid">
+    <a href="#" onclick="openPort(8000,'/');return false;" class="grid-btn">
+        <span class="icon">&#128172;</span>
+        <span class="label">MeshChat</span>
+        <span class="sub">LXMF messaging</span>
+    </a>
+    <a href="#" onclick="openPort(8085,'/');return false;" class="grid-btn">
+        <span class="icon">&#127919;</span>
+        <span class="label">LoRa map</span>
+        <span class="sub">Dartboard of nodes heard</span>
+    </a>
+    <a href="/rnstatus" target="_blank" class="grid-btn">
+        <span class="icon">&#128225;</span>
+        <span class="label">rnstatus</span>
+        <span class="sub">Interface status, live</span>
+    </a>
+    <a href="#" onclick="openPort(8090,'/');return false;" class="grid-btn">
+        <span class="icon">&#128196;</span>
+        <span class="label">NomadNet pages</span>
+        <span class="sub">The node's pages, in the browser</span>
+    </a>
+    <a href="#" onclick="openPort(8096,'/');return false;" class="grid-btn">
+        <span class="icon">&#x2328;</span>
+        <span class="label">Terminal</span>
+        <span class="sub">Shell access</span>
+    </a>
+    <a href="#" onclick="openPort(8098,'/');return false;" class="grid-btn">
+        <span class="icon">&#9881;</span>
+        <span class="label">Services</span>
+        <span class="sub">Start / stop / restart</span>
+    </a>
+    <a href="#" onclick="openPort(8098,'/config/rnsd');return false;" class="grid-btn">
+        <span class="icon">&#128221;</span>
+        <span class="label">rnsd config</span>
+        <span class="sub">~/.reticulum/config</span>
+    </a>
+    <a href="#" onclick="openPort(8098,'/config/meshchat');return false;" class="grid-btn">
+        <span class="icon">&#128221;</span>
+        <span class="label">MeshChat config</span>
+        <span class="sub">Start-up options</span>
+    </a>
+</div>
+
+<div class="badges">
+    <div class="badge"><span class="lbl">Uptime</span><span class="val" id="si-uptime">&mdash;</span></div>
+    <div class="badge"><span class="lbl">CPU</span><span class="val" id="si-cpu">&mdash;</span></div>
+    <div class="badge"><span class="lbl">RAM</span><span class="val" id="si-ram">&mdash;</span></div>
+    <div class="badge"><span class="lbl">Disk</span><span class="val" id="si-disk">&mdash;</span></div>
+</div>
+
+<div id="danger-row">
+    <button class="reboot-btn danger-btn" onclick="confirmAction('reboot')">&#128260; Restart</button>
+    <button class="danger-btn" onclick="confirmAction('shutdown')">&#128308; Power off</button>
+</div>
+
+<div id="modal-bg">
+    <div id="modal">
+        <h2 id="modal-title">Confirm</h2>
+        <p id="modal-msg">Are you sure?</p>
+        <div id="modal-btns">
+            <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+            <button class="modal-confirm" id="modal-ok">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+var API_SERVICES = 'http://' + location.hostname + ':8098';
+
+function openPort(port, path) {
+    window.open('http://' + location.hostname + ':' + port + path, '_blank');
+}
+
+function setBadge(id, cls, text) {
+    document.getElementById('b-' + id).className = 'badge ' + cls;
+    document.getElementById('v-' + id).textContent = text;
+}
+
+// ── Clock: shows the container's (= x12-4's) time, ticking locally ─────────
+var ctOffset = null;   // CT epoch minus browser epoch, ms
+function tickClock() {
+    if (ctOffset === null) return;
+    var d = new Date(Date.now() + ctOffset);
+    document.getElementById('clock-time').textContent = d.toLocaleTimeString('en-GB');
+    document.getElementById('clock-date').textContent =
+        d.toLocaleDateString('en-GB', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+    document.getElementById('clock-src').textContent = 'clock: x12-4 host';
+}
+
+function updateSysinfo() {
+    var t0 = Date.now();
+    fetch('/api/sysinfo').then(function(r) { return r.json(); }).then(function(s) {
+        ctOffset = s.epoch_ms - (t0 + Date.now()) / 2;
+        tickClock();
+
+        document.getElementById('si-uptime').textContent = s.uptime || '—';
+        document.getElementById('si-cpu').textContent = s.cpu_pct + '%';
+        document.getElementById('si-ram').textContent = s.ram_used_mb + ' / ' + s.ram_total_mb + ' MB';
+        document.getElementById('si-disk').textContent =
+            (s.disk_used_mb / 1024).toFixed(1) + ' / ' + (s.disk_total_mb / 1024).toFixed(1) + ' GB';
+        document.getElementById('v-eth').textContent = s.eth_ip || 'none';
+
+    }).catch(function() {});
+}
+
+function svcBadge(id, state) {
+    setBadge(id, state === 'active' ? 'ok' : state === 'failed' ? 'bad' : 'warn', state.toUpperCase());
+}
+
+function updateStatus() {
+    fetch('/api/status').then(function(r) { return r.json(); }).then(function(d) {
+        svcBadge('rnsd', d.rnsd);
+        svcBadge('meshchat', d.meshchat);
+        svcBadge('nomadnet', d.nomadnet);
+        var rn = d.rnode;
+        if (!rn)        setBadge('rnode', 'bad', d.rnsd === 'active' ? 'NOT FOUND' : '—');
+        else if (!rn.up) setBadge('rnode', 'bad', 'DOWN');
+        else {
+            var txt = 'UP';
+            if (rn.noise_floor !== null && rn.noise_floor !== undefined) txt += '  ' + rn.noise_floor + ' dBm';
+            if (rn.airtime !== null && rn.airtime !== undefined) txt += '  air ' + rn.airtime + '%';
+            setBadge('rnode', 'ok', txt);
+        }
+    }).catch(function() {});
+}
+
+// ── Power modal ────────────────────────────────────────────────────────────
+var _pendingAction = null;
+function confirmAction(action) {
+    _pendingAction = action;
+    var isShutdown = action === 'shutdown';
+    document.getElementById('modal-title').textContent =
+        isShutdown ? '🔴 Power off' : '🔄 Restart';
+    document.getElementById('modal-msg').textContent = isShutdown
+        ? 'This will stop the ct168 container. Start it again on x12-4 (pct start 168 or the Proxmox UI).'
+        : 'This will restart the ct168 container. The radio is off for about half a minute.';
+    document.getElementById('modal-ok').textContent = isShutdown ? 'Power off' : 'Restart';
+    document.getElementById('modal-bg').classList.add('show');
+}
+function closeModal() {
+    document.getElementById('modal-bg').classList.remove('show');
+    _pendingAction = null;
+}
+document.getElementById('modal-ok').onclick = function() {
+    if (!_pendingAction) return;
+    fetch(API_SERVICES + '/api/' + _pendingAction, { method: 'POST' }).catch(function() {});
+    closeModal();
+};
+
+updateSysinfo();
+updateStatus();
+setInterval(tickClock, 1000);
+setInterval(updateSysinfo, 15000);
+setInterval(updateStatus, 5000);
+</script>
+</body>
+</html>

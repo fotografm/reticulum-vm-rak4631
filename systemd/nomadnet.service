@@ -1,0 +1,19 @@
+[Unit]
+Description=ct168 NomadNet page server (rnsd client)
+After=rnsd.service network-online.target
+Requires=rnsd.service
+PartOf=rnsd.service
+
+[Service]
+Type=simple
+User=user
+Environment=PYTHONUNBUFFERED=1
+# Wait for rnsd's shared instance, else NomadNet would grab the RNode itself.
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 90); do /home/user/meshchat-venv/bin/rnstatus >/dev/null 2>&1 && exit 0; sleep 1; done; echo "rnsd shared instance not up"; exit 1'
+# No --console: it suppresses ~/.nomadnetwork/logfile (destination = file).
+ExecStart=/home/user/nomadnet-env/bin/nomadnet --daemon
+Restart=always
+RestartSec=15
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,46 @@
+# NomadNet config for ct168-rak4631 — installed by install-nomadnet.sh ONLY if
+# ~/.nomadnetwork/config does not exist yet. Edit the live file, not this one.
+# Same settings as raspi84 + vm169: node only, no propagation, small transfers (LoRa).
+
+[logging]
+loglevel = 4
+destination = file
+
+[client]
+enable_client = yes
+user_interface = text
+downloads_path = ~/Downloads
+notify_on_new_message = yes
+announce_at_start = no
+try_propagation_on_send_fail = no
+periodic_lxmf_sync = no
+lxmf_sync_interval = 360
+lxmf_sync_limit = 8
+required_stamp_cost = None
+accept_invalid_stamps = False
+max_accepted_size = 500
+compact_announce_stream = yes
+
+[textui]
+intro_time = 1
+theme = dark
+colormode = 256
+glyphs = unicode
+mouse_enabled = True
+editor = nano
+hide_guide = no
+
+[node]
+enable_node = yes
+node_name = ct168-rak4631
+announce_interval = 15
+announce_at_start = Yes
+disable_propagation = Yes
+propagation_cost = 16
+max_transfer_size = 64
+max_sync_size = 64
+page_refresh_interval = 1
+
+[printing]
+print_messages = No
+print_command = lp

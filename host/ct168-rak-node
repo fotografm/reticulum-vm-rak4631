@@ -1,0 +1,21 @@
+#!/bin/sh
+# ct168-rak-node — called by udev on x12-4 (99-ct168-rak4631.rules).
+#
+# Keeps /run/ct168-rak/rak4631 = a device node for the RAK4631's CURRENT tty.
+# The directory is bind-mounted into ct168 at /dev/rak, so rnsd in the
+# container always opens /dev/rak/rak4631 — whether the board came back as
+# ttyACM0 or ttyACM1 after a reset, and even if it was plugged in after the
+# container started.
+#
+# Owner 100000:100020 = root:dialout inside the unprivileged container.
+#   ct168-rak-node add <major> <minor>
+#   ct168-rak-node remove
+
+DIR=/run/ct168-rak
+NODE=$DIR/rak4631
+
+mkdir -p "$DIR"
+rm -f "$NODE"
+[ "$1" = add ] || exit 0
+mknod -m 660 "$NODE" c "$2" "$3"
+chown 100000:100020 "$NODE"

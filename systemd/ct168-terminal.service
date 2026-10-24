@@ -1,0 +1,15 @@
+[Unit]
+Description=ct168 Terminal Server (port 8096)
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/ct168-rak4631
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/user/meshchat-venv/bin/python /home/user/ct168-rak4631/terminal_server.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

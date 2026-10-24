@@ -1,0 +1,16 @@
+[Unit]
+Description=ct168 Landing Page (port 80)
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/ct168-rak4631
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/user/meshchat-venv/bin/python /home/user/ct168-rak4631/landing_server.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ct168 &mdash; Config</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+html, body { height:100%; }
+body { display:flex; flex-direction:column; }
+#topbar { display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border-dim);background:var(--panel); }
+#topbar h1 { font-size:13px;color:var(--heading);letter-spacing:3px;text-transform:uppercase; }
+#path { font-size:11px;color:var(--muted); }
+#msg { font-size:12px;margin-left:auto; }
+#editor {
+    flex:1; margin:12px 16px; resize:none;
+    font-family:'DejaVu Sans Mono','Courier New',monospace; font-size:13px; line-height:1.45;
+    color:#e8e8ff; background:#05050f; border:1px solid var(--border);
+    padding:10px 12px; white-space:pre; overflow:auto; tab-size:4;
+}
+#bar { display:flex;gap:10px;flex-wrap:wrap;padding:0 16px 14px; }
+.btn {
+    padding:8px 20px;border-radius:3px;font-family:monospace;font-size:12px;
+    letter-spacing:1px;cursor:pointer;transition:background 0.15s,border-color 0.15s;
+}
+.btn-save    { border:1px solid #2a6a2a;background:#0a1a0a;color:#66ee66; }
+.btn-save:hover    { background:#0f2a0f;border-color:#44cc44;color:#88ff88; }
+.btn-restart { border:1px solid #664400;background:#1a1000;color:#ddaa44; }
+.btn-restart:hover { background:#2a1800;border-color:#eeaa22;color:#ffcc66; }
+.btn-reload  { border:1px solid var(--btn-border);background:var(--btn-bg);color:var(--btn-label); }
+.btn-reload:hover  { background:var(--btn-bg-h); }
+.btn:disabled { opacity:0.3;cursor:default; }
+#dirty { font-size:11px;color:var(--value-warn);align-self:center; }
+</style>
+</head>
+<body>
+<div id="topbar">
+    <h1 id="title">Config</h1>
+    <span id="path"></span>
+    <span id="msg"></span>
+</div>
+<textarea id="editor" spellcheck="false" autocomplete="off"></textarea>
+<div id="bar">
+    <button class="btn btn-save"    id="btn-save"    onclick="save(false)">&#128190; Save</button>
+    <button class="btn btn-restart" id="btn-restart" onclick="save(true)">&#8635; Save &amp; restart</button>
+    <button class="btn btn-reload"  onclick="load()">Reload from disk</button>
+    <span id="dirty"></span>
+</div>
+
+<script>
+'use strict';
+
+var BASE = 'http://' + location.hostname + ':8098';
+var KEY  = location.pathname.split('/').pop();
+var ed   = document.getElementById('editor');
+var original = '';
+
+function showMsg(text, ok) {
+    var m = document.getElementById('msg');
+    m.textContent = text;
+    m.style.color = ok ? 'var(--value-green)' : 'var(--value-alert)';
+}
+
+function markDirty() {
+    document.getElementById('dirty').textContent = ed.value !== original ? 'unsaved changes' : '';
+}
+ed.addEventListener('input', markDirty);
+
+// Tab inserts spaces instead of leaving the textarea
+ed.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    var s = ed.selectionStart;
+    ed.setRangeText('  ', s, ed.selectionEnd, 'end');
+    markDirty();
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (ed.value !== original) { e.preventDefault(); e.returnValue = ''; }
+});
+
+function load() {
+    fetch(BASE + '/api/config/' + KEY).then(function(r){ return r.json(); }).then(function(d) {
+        if (!d.ok) { showMsg(d.message, false); return; }
+        document.title = 'ct168 — ' + d.label;
+        document.getElementById('title').textContent = d.label;
+        document.getElementById('path').textContent = d.path;
+        document.getElementById('btn-restart').innerHTML = '&#8635; Save &amp; restart ' + d.restart;
+        ed.value = original = d.text;
+        markDirty();
+        showMsg('', true);
+    }).catch(function(e){ showMsg('Load failed: ' + e, false); });
+}
+
+function save(restart) {
+    var b1 = document.getElementById('btn-save'), b2 = document.getElementById('btn-restart');
+    b1.disabled = b2.disabled = true;
+    showMsg(restart ? 'Saving and restarting…' : 'Saving…', true);
+    fetch(BASE + '/api/config/' + KEY, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: ed.value, restart: restart}),
+    }).then(function(r){ return r.json(); }).then(function(d) {
+        showMsg(d.message, d.ok);
+        if (d.ok || d.message.indexOf('Saved') === 0) { original = ed.value; markDirty(); }
+    }).catch(function(e){
+        showMsg('Save failed: ' + e, false);
+    }).finally(function(){ b1.disabled = b2.disabled = false; });
+}
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+[Unit]
+Description=ct168 NomadNet pages as HTML (muweb, port 8090)
+After=network.target
+
+[Service]
+Type=simple
+User=user
+Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/home/user
+# The folder NomadNet serves: ONE set of page files for both.
+Environment=MUWEB_PAGES=/home/user/.nomadnetwork/storage/pages
+Environment=MUWEB_PORT=8090
+Environment=MUWEB_TITLE=ct168-rak4631
+ExecStart=/usr/bin/python3 /home/user/muweb/muweb.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

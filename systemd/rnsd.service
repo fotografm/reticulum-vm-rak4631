@@ -1,0 +1,20 @@
+[Unit]
+Description=ct168 Reticulum rnsd (owns the RNode, shared instance)
+After=network.target
+
+[Service]
+Type=simple
+User=user
+SupplementaryGroups=dialout
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/user/meshchat-venv/bin/rnsd
+# Clients (MeshChat, NomadNet, rns-map, the landing page's rnstatus) start
+# only after this. An rnstatus that runs while rnsd starts briefly becomes the
+# shared instance itself; rnsd then attaches to it as a client and never opens
+# the radio. So wait until rnsd OWNS @rns/default, else fail -> restart.
+ExecStartPost=/bin/sh -c 'for i in $(seq 1 30); do ss -xlpn | grep "@rns/default " | grep -q "pid=$MAINPID," && exit 0; sleep 1; done; echo "rnsd is not the shared instance"; exit 1'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

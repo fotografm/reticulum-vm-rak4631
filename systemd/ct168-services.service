@@ -1,0 +1,16 @@
+[Unit]
+Description=ct168 Services Control Server (port 8098)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Environment=HOME=/home/user
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/home/user/ct168-rak4631
+ExecStart=/home/user/meshchat-venv/bin/python /home/user/ct168-rak4631/services_server.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+[Unit]
+Description=ct168 Reticulum MeshChat (port 8000, rnsd client)
+After=rnsd.service network-online.target
+Requires=rnsd.service
+PartOf=rnsd.service
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/reticulum-meshchat
+EnvironmentFile=/home/user/.config/meshchat.env
+Environment=PYTHONUNBUFFERED=1
+# Wait for rnsd's shared instance. If MeshChat started first it would become
+# the shared instance itself and grab the RNode. rnstatus requires a shared
+# instance, so it never opens the radio.
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 60); do /home/user/meshchat-venv/bin/rnstatus >/dev/null 2>&1 && exit 0; sleep 1; done; echo "rnsd shared instance not up"; exit 1'
+ExecStart=/home/user/meshchat-venv/bin/python meshchat.py --headless $MESHCHAT_ARGS
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
