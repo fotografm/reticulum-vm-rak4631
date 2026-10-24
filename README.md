@@ -94,6 +94,14 @@ start (→ restart) otherwise.
 |---|---|
 | MeshChat identity | `140882154c513a24489faabaeb8d1b21` (`~/meshchat-storage/identity`) |
 | NomadNet node | `bc6855d8b192aa21324db080135156d8` (`~/.nomadnetwork/storage/identity`) |
+| NomadNet chat (LXMF, unused) | `5615937e0d202d34fc30a692b0ddd01e`, display name `dummy-ignore` |
+| MeshChat chat (LXMF) | `575beac8c831dc9c320a35c484094e9b` |
+
+NomadNet's own chat address is unused (MeshChat is the messenger). Unnamed
+it shows as "Anonymous Peer", so it is named `dummy-ignore` (key
+`display_name` in `storage/peersettings`, msgpack, edit only while nomadnet
+is stopped) and was announced once via `[client] announce_at_start = yes`
+for one start, then back to `no`. Same as raspi84 and vm169.
 
 Backups on the desktop: `~/Notes/backups/ct168/` (copied with `scp -p`: the
 identity file's mtime is the "since" date on the index page).
