@@ -137,5 +137,14 @@ term.onData(function(data) {
 
 connect();
 </script>
+<script>
+// Size control: change xterm's font size (zooming the page breaks xterm's
+// cell measurements), then refit and tell the server the new cols/rows.
+window.PAGEZOOM_APPLY = function(f) {
+    term.options.fontSize = Math.round(13 * f);
+    doFit(); sendResize();
+};
+</script>
+<script src="/static/textsize.js"></script>
 </body>
 </html>

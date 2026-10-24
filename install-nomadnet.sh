@@ -32,7 +32,16 @@ su - $U -c "$NN_ENV/bin/pip install -q nomadnet==1.4.4 lxmf==1.2.1 rns==1.5.7"
 
 install -d -o $U -g $U $MAP $MAP/static
 install -o $U -g $U -m 644 "$APP_DIR/rns-map/rns_map.py" $MAP/
-install -o $U -g $U -m 644 "$APP_DIR/rns-map/static/index.html" $MAP/static/
+# index.html gets ct168's text-size control inlined (rns-map has no static route)
+# (+ rnsmap-zoomfix.js: keeps the hover tooltip next to the mouse when zoomed)
+python3 - "$APP_DIR/rns-map/static/index.html" "$APP_DIR/static/textsize.js" $MAP/static/index.html "$APP_DIR/static/rnsmap-zoomfix.js" << 'EOT'
+import sys
+page, out = open(sys.argv[1]).read(), sys.argv[3]
+js = open(sys.argv[2]).read() + open(sys.argv[4]).read()
+assert page.count("</body>") == 1
+open(out, "w").write(page.replace("</body>", "<script>\n" + js + "</script>\n</body>"))
+EOT
+chown $U:$U $MAP/static/index.html
 [ -x $MAP/venv/bin/python ] || su - $U -c "python3 -m venv $MAP/venv"
 su - $U -c "$MAP/venv/bin/pip install -q -U pip"
 su - $U -c "$MAP/venv/bin/pip install -q rns==1.5.7 aiohttp==3.11.11 msgpack==1.1.2"

@@ -31,6 +31,26 @@ Services, rnsd config, MeshChat config; Restart / Power off (= the container).
                                                        └─ rns-map  :8085
 ```
 
+## Page size control (A− 100% A+)
+
+Brave/Chrome keep ONE zoom level per host and ignore the port, so zooming
+one ct168 page zooms all of them. Every page we serve therefore has its own
+small **A− 100% A+** control (bottom right); the size is kept in
+localStorage, which IS per port. Leave the browser zoom at 100 %.
+
+- `static/textsize.js` — the control; CSS `zoom` on `<html>`. Loaded from
+  `/static/` by landing, rnstatus (:80), services + editors (:8098) and the
+  terminal (:8096). The terminal sets `PAGEZOOM_APPLY` to change xterm's
+  font size and refit instead (page zoom breaks xterm's measurements).
+- NomadNet web pages (:8090): muweb inlines the file via
+  `MUWEB_INJECT_JS` (an option added to ct168's copy of muweb.py, so its
+  md5 differs from Loc2's).
+- LoRa map (:8085): install-nomadnet.sh inlines textsize.js +
+  `static/rnsmap-zoomfix.js` into the installed `index.html` (rns-map has no
+  static route; its code is untouched). The fix keeps the hover tooltip next
+  to the mouse when zoomed.
+- MeshChat (:8000) is not covered (not our code).
+
 ## Radio
 
 - RNode firmware 1.86 `rnode_firmware_rak4631.zip`, SX1262, max 22 dBm.
@@ -115,7 +135,7 @@ identity file's mtime is the "since" date on the index page).
 | `~/reticulum-meshchat/` | MeshChat at `df5aea94eab7` + built `public/` |
 | `~/nomadnet-env/` | NomadNet 1.4.4 / lxmf 1.2.1 / rns 1.5.7 |
 | `~/rns-map/` | rns-map code, venv, `nodes.db` |
-| `~/muweb/muweb.py` | Micron → HTML server (Loc2's, md5 bc54b445…) |
+| `~/muweb/muweb.py` | Micron → HTML server (Loc2's + `MUWEB_INJECT_JS`) |
 | `~/.reticulum/config` | rnsd config |
 | `~/.config/meshchat.env` | MeshChat start-up options |
 | `~/.nomadnetwork/` | NomadNet config, identity, `storage/pages/`, `storage/pagetext/index.body.mu` |

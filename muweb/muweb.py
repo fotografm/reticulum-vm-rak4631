@@ -14,7 +14,8 @@ Links to local pages become ordinary links; links to other Reticulum
 destinations cannot be followed from a browser and are shown as text.
 
 Config by environment: MUWEB_PAGES (dir), MUWEB_PORT (default 80),
-MUWEB_TITLE (browser tab title).
+MUWEB_TITLE (browser tab title), MUWEB_INJECT_JS (optional JS file added to
+every full page, read at start; ct168 uses it for its text-size control).
 """
 
 import html
@@ -29,6 +30,17 @@ PAGES = os.environ.get("MUWEB_PAGES", "/opt/muweb/pages")
 PORT = int(os.environ.get("MUWEB_PORT", "80"))
 TITLE = os.environ.get("MUWEB_TITLE", "868 MHz monitor")
 PAGE_TIMEOUT = 30
+
+
+def _read_inject():
+    path = os.environ.get("MUWEB_INJECT_JS", "")
+    try:
+        return open(path).read() if path else ""
+    except OSError:
+        return ""
+
+
+INJECT_JS = _read_inject()
 
 CSS = """
 :root { color-scheme: dark; }
@@ -291,7 +303,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send(200, "<!doctype html><html><head><meta charset=utf-8>"
                   "<meta name=viewport content='width=device-width,initial-scale=1'>"
                   "<title>%s</title><style>%s</style></head><body><div class=mu>%s</div>"
-                  "<script>%s</script></body></html>" % (html.escape(TITLE), CSS, body, JS))
+                  "<script>%s</script></body></html>" % (html.escape(TITLE), CSS, body, JS + INJECT_JS))
 
 
 def load_local_hash():
