@@ -2,7 +2,7 @@
 # setup-host.sh — run ON x12-4 as root (deploy-host.sh on the desktop does this).
 #
 # 1. udev rule + helper: the RAK4631 RNode gets a stable device node in
-#    /run/ct168-rak/, which is bind-mounted into ct168 at /dev/rak.
+#    /dev/ct168-rak/, which is bind-mounted into ct168 at /dev/rak.
 # 2. Creates ct168-rak4631 (unprivileged Debian 13) if it does not exist yet.
 # 3. Adds the RAK passthrough lines to /etc/pve/lxc/168.conf and starts it.
 #
@@ -35,14 +35,16 @@ cat > /etc/udev/rules.d/99-ct168-rak4631.rules << EOF
 ACTION=="add", SUBSYSTEM=="tty", ENV{ID_VENDOR_ID}=="239a", ENV{ID_MODEL_ID}=="8029", ENV{ID_SERIAL_SHORT}=="$RAK_SERIAL", RUN+="/usr/local/sbin/ct168-rak-node add %M %m"
 ACTION=="remove", SUBSYSTEM=="tty", ENV{ID_VENDOR_ID}=="239a", ENV{ID_MODEL_ID}=="8029", ENV{ID_SERIAL_SHORT}=="$RAK_SERIAL", RUN+="/usr/local/sbin/ct168-rak-node remove"
 EOF
-# /run is empty after a host reboot: recreate the directory before CTs start
-echo 'd /run/ct168-rak 0755 root root -' > /etc/tmpfiles.d/ct168-rak.conf
+# The folder lives in the host's /dev (devtmpfs) because /run is mounted
+# nodev and a bind mount inherits that: nodes there cannot be opened in the CT.
+# /dev is fresh after a host reboot: recreate the folder before CTs start.
+echo 'd /dev/ct168-rak 0755 root root -' > /etc/tmpfiles.d/ct168-rak.conf
 systemd-tmpfiles --create /etc/tmpfiles.d/ct168-rak.conf
 udevadm control --reload
 udevadm trigger --action=add --subsystem-match=tty
 udevadm settle
-if [ -e /run/ct168-rak/rak4631 ]; then
-    echo "     RAK4631 present: $(ls -l /run/ct168-rak/rak4631)"
+if [ -e /dev/ct168-rak/rak4631 ]; then
+    echo "     RAK4631 present: $(ls -l /dev/ct168-rak/rak4631)"
 else
     echo "     RAK4631 not plugged in (or not running RNode firmware) — node appears when it is"
 fi
@@ -65,9 +67,12 @@ fi
 # ── 3. RAK passthrough lines ─────────────────────────────────────────────────
 echo "[3/3] Passthrough lines in /etc/pve/lxc/$CTID.conf"
 CONF=/etc/pve/lxc/$CTID.conf
-# 166 = ttyACM major. "optional": the CT still starts if /run/ct168-rak is missing.
+# First version bind-mounted /run/ct168-rak (nodev, unusable): drop it
+sed -i '\#^lxc.mount.entry: /run/ct168-rak #d' "$CONF"
+rm -rf /run/ct168-rak
+# 166 = ttyACM major. "optional": the CT still starts if /dev/ct168-rak is missing.
 for line in 'lxc.cgroup2.devices.allow: c 166:* rwm' \
-            'lxc.mount.entry: /run/ct168-rak dev/rak none bind,optional,create=dir 0 0'; do
+            'lxc.mount.entry: /dev/ct168-rak dev/rak none bind,optional,create=dir 0 0'; do
     grep -qxF "$line" "$CONF" || echo "$line" >> "$CONF"
 done
 grep '^lxc\.' "$CONF" | sed 's/^/     /'

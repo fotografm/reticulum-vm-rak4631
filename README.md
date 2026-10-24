@@ -23,7 +23,7 @@ Services, rnsd config, MeshChat config; Restart / Power off (= the container).
 
 ```
  x12-4 host                          ct168-rak4631 (LXC)
- RAK4631 ─USB─ udev ─ /run/ct168-rak/rak4631 ══bind══ /dev/rak/rak4631
+ RAK4631 ─USB─ udev ─ /dev/ct168-rak/rak4631 ══bind══ /dev/rak/rak4631
                                                        │
                                                      rnsd (shared instance, transport ON)
                                                        ├─ MeshChat :8000
@@ -63,13 +63,16 @@ refuses to start the CT when the device is missing, so it is not used.
 - `/etc/udev/rules.d/99-ct168-rak4631.rules` matches 239a:8029 (RNode app,
   not the 239a:0029 bootloader) + USB serial `A1D903F3105B7AFC`, and runs
   `/usr/local/sbin/ct168-rak-node`, which recreates
-  `/run/ct168-rak/rak4631` with the current major:minor, owner
+  `/dev/ct168-rak/rak4631` with the current major:minor, owner
   100000:100020 (= root:dialout in the CT), mode 660.
-- `/etc/tmpfiles.d/ct168-rak.conf` recreates `/run/ct168-rak` at boot.
+- `/etc/tmpfiles.d/ct168-rak.conf` recreates `/dev/ct168-rak` at boot.
+- **Not /run:** host `/run` is mounted `nodev` and the bind mount inherits it,
+  so even root in the CT gets "Permission denied" on the node. `/dev`
+  (devtmpfs) has no nodev.
 - `/etc/pve/lxc/168.conf`:
   ```
   lxc.cgroup2.devices.allow: c 166:* rwm
-  lxc.mount.entry: /run/ct168-rak dev/rak none bind,optional,create=dir 0 0
+  lxc.mount.entry: /dev/ct168-rak dev/rak none bind,optional,create=dir 0 0
   ```
   The DIRECTORY is bind-mounted, so a node recreated after a replug is seen
   in the CT at once. rnsd retries the port every few seconds.
