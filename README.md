@@ -38,7 +38,9 @@ one ct168 page zooms all of them. Every page we serve therefore has its own
 small **A− 100% A+** control (bottom right); the size is kept in
 localStorage, which IS per port. Leave the browser zoom at 100 %.
 
-- `static/textsize.js` — the control; CSS `zoom` on `<html>`. Loaded from
+- `static/textsize.js` — the control; CSS `zoom` on `<html>`, plus `--pz`
+  (the factor) so `min-height: calc(100vh / var(--pz, 1))` still means one
+  screen. Loaded from
   `/static/` by landing, rnstatus (:80), services + editors (:8098) and the
   terminal (:8096). The terminal sets `PAGEZOOM_APPLY` to change xterm's
   font size and refit instead (page zoom breaks xterm's measurements).

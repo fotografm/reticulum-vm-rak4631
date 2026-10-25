@@ -5,9 +5,12 @@
  * "A− 100% A+" control (bottom right) and remembers the size in localStorage,
  * which IS separate per port. Leave the browser's own zoom at 100 %.
  *
- * Default: CSS zoom on <html>. A page can set window.PAGEZOOM_APPLY = fn(f)
- * BEFORE loading this script to scale itself (the terminal changes xterm's
- * font size instead, because zooming the page breaks xterm's measurements).
+ * Default: CSS zoom on <html>, plus --pz (the factor) on <html> so that
+ * min-height: calc(100vh / var(--pz, 1)) still means one screen (CSS zoom
+ * scales 100vh too, which left empty space to scroll). A page can set
+ * window.PAGEZOOM_APPLY = fn(f) BEFORE loading this script to scale itself
+ * (the terminal changes xterm's font size instead, because zooming the page
+ * breaks xterm's measurements).
  *
  * Same file is served by the landing / services / terminal servers
  * (/static/textsize.js), inlined into rns-map's index.html and muweb pages
@@ -35,7 +38,10 @@
     var label;
     function apply() {
         if (typeof window.PAGEZOOM_APPLY === 'function') window.PAGEZOOM_APPLY(f);
-        else document.documentElement.style.zoom = f === 1 ? '' : String(f);
+        else {
+            document.documentElement.style.zoom = f === 1 ? '' : String(f);
+            document.documentElement.style.setProperty('--pz', String(f));
+        }
         if (label) label.textContent = Math.round(f * 100) + '%';
         // let pages that size themselves from the window (rns-map) redraw
         window.dispatchEvent(new Event('resize'));
