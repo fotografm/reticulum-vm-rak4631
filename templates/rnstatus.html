@@ -15,11 +15,12 @@
     font-size:13px; line-height:1.45; color:var(--value-green);
     background:#05050f; border:1px solid var(--border-dim); border-radius:4px;
 }
+.host { color:#66dd66; font-weight:bold; font-size:18px; letter-spacing:1px; text-transform:none; vertical-align:middle; }  /* hostname, same on every page */
 </style>
 </head>
 <body>
 <div id="topbar">
-    <h1>&#128225; rnstatus &mdash; ct168</h1>
+    <h1>&#128225; <span class="host">ct168</span> rnstatus</h1>
     <button id="pause" onclick="togglePause()">Pause</button>
     <span id="tick"></span>
 </div>

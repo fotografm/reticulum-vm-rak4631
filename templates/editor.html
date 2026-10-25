@@ -31,11 +31,12 @@ body { display:flex; flex-direction:column; }
 .btn-reload:hover  { background:var(--btn-bg-h); }
 .btn:disabled { opacity:0.3;cursor:default; }
 #dirty { font-size:11px;color:var(--value-warn);align-self:center; }
+.host { color:#66dd66; font-weight:bold; font-size:18px; letter-spacing:1px; text-transform:none; vertical-align:middle; }  /* hostname, same on every page */
 </style>
 </head>
 <body>
 <div id="topbar">
-    <h1 id="title">Config</h1>
+    <h1><span class="host">ct168</span> <span id="title">Config</span></h1>
     <span id="path"></span>
     <span id="msg"></span>
 </div>

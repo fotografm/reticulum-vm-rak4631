@@ -50,11 +50,12 @@ body { background:var(--bg);color:var(--text);font-family:monospace;font-size:13
 .status-inactive { color:#8888aa; }
 .status-failed   { color:#ee4444; }
 .status-unknown  { color:#cccc00; }
+.host { color:#66dd66; font-weight:bold; font-size:18px; letter-spacing:1px; text-transform:none; vertical-align:middle; }  /* hostname, same on every page */
 </style>
 </head>
 <body>
 <div id="topbar">
-    <h1>&#9881; ct168 Services</h1>
+    <h1>&#9881; <span class="host">ct168</span> Services</h1>
     <span id="tick"></span>
 </div>
 

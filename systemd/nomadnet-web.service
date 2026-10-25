@@ -11,6 +11,7 @@ Environment=HOME=/home/user
 Environment=MUWEB_PAGES=/home/user/.nomadnetwork/storage/pages
 Environment=MUWEB_PORT=8090
 Environment=MUWEB_TITLE=ct168-rak4631
+Environment=MUWEB_HOST=ct168
 Environment=MUWEB_INJECT_JS=/home/user/ct168-rak4631/static/textsize.js
 ExecStart=/usr/bin/python3 /home/user/muweb/muweb.py
 Restart=always

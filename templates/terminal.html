@@ -42,11 +42,12 @@ html, body {
     padding: 4px 6px;
     background: #000;
 }
+.host { color:#66dd66; font-weight:bold; font-size:18px; letter-spacing:1px; text-transform:none; vertical-align:middle; }  /* hostname, same on every page */
 </style>
 </head>
 <body>
 <div id="titlebar">
-    <span id="titlebar-title">ct168 &mdash; Terminal</span>
+    <span id="titlebar-title"><span class="host">ct168</span> Terminal</span>
     <span id="conn-status">connecting&hellip;</span>
 </div>
 <div id="term-container"></div>

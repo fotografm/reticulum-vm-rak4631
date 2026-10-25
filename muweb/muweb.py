@@ -15,7 +15,8 @@ destinations cannot be followed from a browser and are shown as text.
 
 Config by environment: MUWEB_PAGES (dir), MUWEB_PORT (default 80),
 MUWEB_TITLE (browser tab title), MUWEB_INJECT_JS (optional JS file added to
-every full page, read at start; ct168 uses it for its text-size control).
+every full page, read at start; ct168 uses it for its text-size control),
+MUWEB_HOST (optional hostname shown in green above every page).
 """
 
 import html
@@ -41,12 +42,17 @@ def _read_inject():
 
 
 INJECT_JS = _read_inject()
+HOST = os.environ.get("MUWEB_HOST", "")
+HOSTBAR = ("<div class=hostbar><span class=host>%s</span> NomadNet pages</div>"
+           % html.escape(HOST)) if HOST else ""
 
 CSS = """
 :root { color-scheme: dark; }
 body { background:#000; color:#ddd; margin:0; padding:12px 16px;
        font: 14px/1.25 "DejaVu Sans Mono", Menlo, Consolas, monospace; }
 .mu { white-space: pre; }
+.hostbar { color:#aaa; margin-bottom:8px; }
+.host { color:#66dd66; font-weight:bold; font-size:18px; letter-spacing:1px; }
 .mu .ln { min-height: 1.25em; }
 .mu .c { text-align: center; } .mu .r { text-align: right; }
 .mu h1 { font-size: 1.15em; margin: .2em 0; padding: .15em .4em; background:#223; color:#fff; }
@@ -302,8 +308,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         self.send(200, "<!doctype html><html><head><meta charset=utf-8>"
                   "<meta name=viewport content='width=device-width,initial-scale=1'>"
-                  "<title>%s</title><style>%s</style></head><body><div class=mu>%s</div>"
-                  "<script>%s</script></body></html>" % (html.escape(TITLE), CSS, body, JS + INJECT_JS))
+                  "<title>%s</title><style>%s</style></head><body>%s<div class=mu>%s</div>"
+                  "<script>%s</script></body></html>" % (html.escape(TITLE), CSS, HOSTBAR, body, JS + INJECT_JS))
 
 
 def load_local_hash():

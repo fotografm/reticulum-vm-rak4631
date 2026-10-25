@@ -51,6 +51,12 @@ localStorage, which IS per port. Leave the browser zoom at 100 %.
   to the mouse when zoomed.
 - MeshChat (:8000) is not covered (not our code).
 
+Hostname: every page starts with **ct168** in 18 px bold bright green
+(`#66dd66`, CSS class `.host`), then the page name. LoRa map: added before
+"RNS LIVE" by install-nomadnet.sh. NomadNet web pages: muweb shows
+"ct168 NomadNet pages" above each page when `MUWEB_HOST` is set (another
+ct168-only muweb option).
+
 ## Radio
 
 - RNode firmware 1.86 `rnode_firmware_rak4631.zip`, SX1262, max 22 dBm.
